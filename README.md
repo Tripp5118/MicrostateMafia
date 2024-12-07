@@ -1,18 +1,13 @@
 # MicrostateMafia
-Joshua Camacho, Nicolas Flores, Elias Martin, Robert Robinson, Andye Tosh
 
-<h4>To Run this code:</h4>
-You will need to run
+**Contributors**: Joshua Camacho, Nicolas Flores, Elias Martin, Robert Robinson, Andye Tosh
+
+## To Run This Code
+
+You will need to install the following Python libraries:
+
+```bash
+pip install matplotlib scipy numpy
 ```
-    pip install matplotlib scipy numpy
-```
-in your python terminal. That should be it...
 
-I think with the report we will be turning in a .zip that will have a .venv already included (maybe)
-The exact data that we collected is in results-thermo-project.xlsx
-
-Also important to note is that every script is going to output pictures to the root directory of the project.
-There is also a bug with MatPlotLib right now, when it opens the GIF of the phase diagram and GX curves along with the GX curves at specific temperatures, the code will hang unless you close the GIF window before closing the image of the GX curve.
-
-Report Link:
-https://docs.google.com/document/d/14G2j40-SgYG6pWnG734lRTH8zE1kVY0aMJqSn96GV5E/edit?usp=sharing
+We think the `.zip` we’ll submit might include a `.venv` (virtual environment) already set up. This is not guaranteed but might simplify running the code. The exact data we collected is stored in the file `results-thermo-project.xlsx`. All scripts will output pictures to the root directory of the project. There is currently a bug with Matplotlib: when the code opens the GIF of the phase diagram and GX curves (along with the GX curves at specific temperatures), the program will hang unless you close the GIF window before closing the GX curve image. Be aware of this behavior when running the scripts.
