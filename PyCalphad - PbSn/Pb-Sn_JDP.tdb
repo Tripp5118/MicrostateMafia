@@ -1,0 +1,149 @@
+$-------------------------------------------------------------------------------
+$  ____  _               ____        
+$ |  _ \| |__           / ___| _ __  
+$ | |_) | '_ \   _____  \___ \| '_ \ 
+$ |  __/| |_) | |_____|  ___) | | | |
+$ |_|   |_.__/          |____/|_| |_|
+$                                    
+$-------------------------------------------------------------------------------                                  
+
+$-------------------------------------------------------------------------------
+$ 
+$ TDB file created by J. D. Paramore 2024
+$
+$ This file was created exclusively as teaching material for the course MSEN 
+$ 640: Thermodynamics of Materials at Texas A&M University. The data provided 
+$ here have been simplified for instructional purposes to facilitate learning 
+$ and may not meet the rigorous standards or best practices required in modern
+$ computational thermodynamics research. If there is any intention to use this 
+$ file beyond the educational exercises for which it was prepared, the reader 
+$ is strongly advised to consult the original sources referenced below.
+$
+$ ------------------------------------------------------------------------------
+$ 
+$ ELEMENTAL DATA TAKEN FROM
+$
+$ A. Dinsdale, https://doi.org/10.1016/0364-5916(91)90030-N
+$
+$ PHASE PARAMETERS ADAPTED FROM 
+$
+$ U. Kattner, https://www.metallurgy.nist.gov/phase/solder/solder.html
+$
+$ ------------------------------------------------------------------------------
+
+$-------------------------------------------------------------------------------
+$ STANDARD ELEMENTAL DATA
+$-------------------------------------------------------------------------------
+
+ELEMENT /-   ELECTRON_GAS                   0.0000E+00  0.0000E+00  0.0000E+00 !
+ELEMENT VA   VACUUM                         0.0000E+00  0.0000E+00  0.0000E+00 !
+ELEMENT PB   FCC_A1                         2.0720E+02  6.8785E+03  6.4785E+01 !
+ELEMENT SN   BCT_A5                         1.1869E+02  6.3220E+03  5.1195E+01 !
+
+$-------------------------------------------------------------------------------
+$ FUNCTIONS FOR PURE COMPONENTS
+$-------------------------------------------------------------------------------
+
+$------
+$ Pb
+$------
+ 
+FUNCTION GHSERPB   298.15         -7650.085+101.700244*T-24.5242231*T*LN(T)     
+                                  -.00365895*T**2-2.4395E-07*T**3;
+                   600.61 Y       -10531.095+154.243182*T-32.4913959*T*LN(T)
+                                  +.00154613*T**2+8.054E+25*T**(-9);
+                   1200 Y         4157.616+53.139072*T-18.9640637*T*LN(T)
+                                  -.002882943*T**2+9.8144E-08*T**3
+                                  -2696755*T**(-1)+8.054E+25*T**(-9);
+                   2100 N !
+
+FUNCTION GLIQPB    298.15         4672.124-7.750683*T-60.19E-20*T**7+GHSERPB;
+                   600.61 Y       -5677.958+146.176046*T-32.4913959*T*LN(T)
+				                  +1.54613E-3*T**2;  
+				   1200.00 Y      9010.753+45.071937*T-18.9640637*T*LN(T)
+				                  -2.882943E-3*T**2+0.098144E-6*T**3
+								  -2696755*T**(-1);
+				   2100.00 N !
+
+FUNCTION GBCTPB    298.15         489+3.52*T+GHSERPB; 
+                   6000 N !
+
+$------
+$ Sn
+$------
+
+FUNCTION GHSERSN   100            -7958.517+122.765451*T-25.858*T*LN(T)
+                                  +.00051185*T**2-3.192767E-06*T**3
+                                  +18440*T**(-1);
+                   250 Y          -5855.135+65.443315*T-15.961*T*LN(T)
+                                  -.0188702*T**2+3.121167E-06*T**3
+                                  -61960*T**(-1);
+                   505.08 Y       2524.724+4.005269*T-8.2590486*T*LN(T)
+                                  -.016814429*T**2+2.623131E-06*T**3
+                                  -1081244*T**(-1)-1.2307E+25*T**(-9);
+                   800 Y          -8256.959+138.99688*T-28.4512*T*LN(T)
+                                  -1.2307E+25*T**(-9);
+                   3000 N !
+
+FUNCTION GLIQSN    100            7103.092-14.087767*T+147.031E-20*T**7+GHSERSN;
+                   505.078 Y      9496.31-9.809114*T-8.2590486*T*LN(T)
+                                  -16.814429E-3*T**2+2.623131E-6*T**3
+                                  -1081244*T**(-1);
+                   800 Y          -1285.372+125.182498*T-28.4512*T*LN(T);
+                   3000 N !
+
+FUNCTION GFCCSN    100            5510-8.46*T+GHSERSN;
+                   3000 N !
+
+$-------------------------------------------------------------------------------
+ 
+TYPE_DEFINITION % SEQ *!
+DEFINE_SYSTEM_DEFAULT ELEMENT 2 !
+DEFAULT_COMMAND DEF_SYS_ELEMENT VA /- !
+
+$-------------------------------------------------------------------------------
+$ LIQUID PHASE - STANDARD GIBBS FREE ENERGIES AND INTERACTION PARAMETERS
+$-------------------------------------------------------------------------------
+ 
+PHASE LIQUID %  1  1.0  !
+CONSTITUENT LIQUID :PB,SN:  !
+
+PARAMETER G(LIQUID,PB;0)          298.15    GLIQPB;                     6000 N !
+PARAMETER G(LIQUID,SN;0)          298.15    GLIQSN;                     6000 N !
+
+PARAMETER L(LIQUID,PB,SN;0)       298.15    5368+0.93414*T;             6000 N !
+PARAMETER L(LIQUID,PB,SN;1)       298.15    97.8+0.09354*T;             6000 N !
+
+$-------------------------------------------------------------------------------
+$ FCC_A1 PHASE - STANDARD GIBBS FREE ENERGIES AND INTERACTION PARAMETERS
+$-------------------------------------------------------------------------------
+ 
+PHASE FCC_A1  %  1  1.0  !
+CONSTITUENT FCC_A1  :PB,SN:  !
+
+PARAMETER G(FCC_A1,PB;0)          298.15    GHSERPB;                    6000 N !
+PARAMETER G(FCC_A1,SN;0)          298.15    GFCCSN;                     6000 N !
+
+PARAMETER L(FCC_A1,PB,SN;0)       298.15    4758.8+2.4719*T;            6000 N !
+PARAMETER L(FCC_A1,PB,SN;1)       298.15    2293.4-4.9197*T;            6000 N !
+
+$-------------------------------------------------------------------------------
+$ BCT_A5 PHASE - STANDARD GIBBS FREE ENERGIES AND INTERACTION PARAMETERS
+$-------------------------------------------------------------------------------
+ 
+PHASE BCT_A5  %  1  1.0  !
+CONSTITUENT BCT_A5  :PB,SN:  !
+
+PARAMETER G(BCT_A5,PB;0)          298.15    GBCTPB;                     6000 N !
+PARAMETER G(BCT_A5,SN;0)          298.15    GHSERSN;                    6000 N !
+
+PARAMETER L(BCT_A5,PB,SN;0)       298.15    19693.75-15.89485*T;        6000 N !
+
+$-------------------------------------------------------------------------------
+$ __  __ ___ ____   ____  ____   ___  ____          
+$|  \/  |_ _/ ___| |  _ \|  _ \ / _ \|  _ \         
+$| |\/| || | |     | | | | |_) | | | | |_) |        
+$| |  | || | |___  | |_| |  _ <| |_| |  __/   _ _ _ 
+$|_|  |_|___\____| |____/|_| \_\\___/|_|     (_|_|_)                                                   
+$
+$-------------------------------------------------------------------------------
