@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.optimize import least_squares
 
+# This was my favorite part of the project bc it's so simple but its so cool
+
 R = 8.31446261815324
 LN = ln = Ln = lN = np.log
 resolution = 1e-6

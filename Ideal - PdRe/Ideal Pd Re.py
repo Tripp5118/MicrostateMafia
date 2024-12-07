@@ -112,28 +112,8 @@ DeltaG_mix_L = lambda X_2, T: T*S_ideal(X_2) + (1-X_2)*Liq_hanging_Pd(T) + X_2*L
 
 plotres = 1e-4
 
+# Define the compositional range for plotting.
 Xrange = np.arange(plotres, 1 - plotres, plotres)
-
-plottemp = 1000 + 273.15
-
-plt.figure('Random GX Plot',dpi=300)
-plt.title(model_name + f' - $T$ = {plottemp - 273.15:.1f} °C\n')
-plt.plot(Xrange, DeltaG_mix_FCC(Xrange, plottemp),color='r',label='FCC')
-plt.plot(Xrange, DeltaG_mix_HCP(Xrange, plottemp),color='purple',label='HCP')
-plt.plot(Xrange, DeltaG_mix_L(Xrange, plottemp),color='b',label='L')
-plt.ylabel(r'Δ$G_\mathrm{mix}$ (J/mol)')
-plt.xlabel(f'$X_\\mathrm{{{comp2}}}$ (mol/mol)')
-plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
-
-ymin = min(min(DeltaG_mix_FCC(Xrange, plottemp)),min(DeltaG_mix_HCP(Xrange, plottemp)),min(DeltaG_mix_L(Xrange, plottemp)))
-
-plt.ylim(ymin*1.1,0)
-plt.xlim(0,1)
-plt.legend()
-plt.show()
-
-print(f'This cell took {time.time()-start:.2f} seconds to run.')
-
 #%%
 #  _____      _            _   _        ____        _                
 # | ____|   _| |_ ___  ___| |_(_) ___  / ___|  ___ | |_   _____ _ __ 
@@ -189,12 +169,12 @@ T_eutectic = eutec_soln[3]
 plottemp = T_eutectic
 
 
-plt.figure('Eutectic GX Plot',dpi=300)
+plt.figure('Peritectic GX Plot',dpi=300)
 plt.title(model_name + f' - $T$ = {plottemp - 273.15:.1f} °C\n')
 plt.plot(Xrange, DeltaG_mix_FCC(Xrange, plottemp),color='r',label='FCC')
 plt.plot(Xrange, DeltaG_mix_HCP(Xrange, plottemp),color='purple',label='HCP')
 plt.plot(Xrange, DeltaG_mix_L(Xrange, plottemp),color='b',label='L')
-plt.plot([X_2_FCC_eutectic,X_2_HCP_eutectic],[DeltaG_mix_FCC(X_2_FCC_eutectic, T_eutectic),DeltaG_mix_HCP(X_2_HCP_eutectic, T_eutectic)],color='black',linestyle='--')
+plt.plot([X_2_L_eutectic,X_2_HCP_eutectic],[DeltaG_mix_L(X_2_L_eutectic, T_eutectic),DeltaG_mix_HCP(X_2_HCP_eutectic, T_eutectic)],color='black',linestyle='--')
 plt.ylabel(r'Δ$G_\mathrm{mix}$ (J/mol)')
 plt.xlabel(f'$X_\\mathrm{{{comp2}}}$ (mol/mol)')
 plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
@@ -206,6 +186,7 @@ ymin = min(min(DeltaG_mix_FCC(Xrange, plottemp)),min(DeltaG_mix_HCP(Xrange, plot
 plt.ylim(ymin*1.1,0)
 plt.xlim(0,1)
 plt.legend()
+plt.savefig(model_name + ', $T$ = ' + f"{(plottemp - 273.15):.1f} °C.png")
 plt.show()
 
 print(f'This cell took {time.time()-start:.2f} seconds to run.')
@@ -490,7 +471,7 @@ def plotgxcurves(temp_step):
     ax2.plot(HCPsolidusVALS,temprange - 273.15,color='purple')
     ax2.plot(FCCliquidusVALS,temprange - 273.15,color='b')
     ax2.plot(HCPliquidusVALS,temprange - 273.15,color='b')
-    ax2.plot([X_2_FCC_eutectic,X_2_HCP_eutectic],[T_eutectic - 273.15,T_eutectic - 273.15],color='black')
+    ax2.plot([X_2_L_eutectic,X_2_HCP_eutectic],[T_eutectic - 273.15,T_eutectic - 273.15],color='black')
 
     try:
         xleft = FCCsolvus(plottemp)
@@ -572,7 +553,7 @@ print('Plotting GX curves and tangents at several different temperatures...')
 
 # Define plot temperatures in °C. You can add/remove as many temperatures as 
 # you want from the list.
-temps_in_C = [1000]
+temps_in_C = [1000,1550,2000,3000]
 
 # Define plot temperature in K.
 temps = [T + 273.15 for T in temps_in_C]
@@ -645,7 +626,7 @@ def plotgxcurves(plottemp):
         plt.text(xright + 2e-2,(yright+ymin)/2,round(xright,4), backgroundcolor = 'white',horizontalalignment="left",verticalalignment="bottom")
     except:
         pass
-
+    plt.savefig(model_name + ', $T$ = ' + f"{(plottemp - 273.15):.1f} °C.png")
     plt.show()
 
     return plt

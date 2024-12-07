@@ -61,14 +61,28 @@ LN = ln = Ln = lN = np.log
 # resolution I've defined for you here should be good.
 resolution = 1e-6
 
+plotres = 1e-4
+
+# Define the compositional range for plotting.
+Xrange = np.arange(plotres, 1 - plotres, plotres)
+
+"""
+INSERT YOUR CODE HERE...
+
+You'll need to define equations from the TDB file and your own understanding of
+thermodynamics to set up how you define the full mixing equations below.
+
+IMPORTANT: If I have defined a function or variable as "INSERT YOUR CODE HERE",
+make sure you keep the function or variable name unchanged. Otherwise, you will
+be unable to use much of my subsequent code.
+
+"""
 ### "if True" for cleanliness
 if True:
     ## The following taken from TDB File correct such that phase at STP is considered at G_0 = 0
     ## As no equations were given for below STP temps, we assume it is close enough till 273 K
     FCC_abs_Pb = lambda T: -10531.095+154.243182*T-32.4913959*T*LN(T)+.00154613*T**2+8.054E+25*T**(-9)
-    
     #^^^ Only for above 600.61 as that is all that is needed. vvv similar
-    
     BCT_abs_Sn = lambda T: (-5855.135+65.443315*T-15.961*T*LN(T)
                                   -.0188702*T**2+3.121167E-06*T**3
                                   -61960*T**(-1) if T<505.078
@@ -87,8 +101,6 @@ if True:
                                 else 9496.31-9.809114*T-8.2590486*T*LN(T)
                                   -16.814429E-3*T**2+2.623131E-6*T**3
                                   -1081244*T**(-1)-BCT_abs_Sn(T))
-    
-    
 
     S_ideal = lambda X_2: R*(X_2*ln(X_2)+(1-X_2)*ln(1-X_2))
 
@@ -96,45 +108,6 @@ if True:
 DeltaG_mix_FCC = lambda X_2, T:  T*S_ideal(X_2) + (1-X_2)*FCC_hanging_Pb(T) + X_2*FCC_hanging_Sn(T)
 DeltaG_mix_BCT = lambda X_2, T: T*S_ideal(X_2) + (1-X_2)*BCT_hanging_Pb(T) + X_2*BCT_hanging_Sn(T)
 DeltaG_mix_L = lambda X_2, T: T*S_ideal(X_2) + (1-X_2)*Liq_hanging_Pb(T) + X_2*Liq_hanging_Sn(T)
-
-# Now that we have our DeltaG_mix equations all defined, let's test our
-# code by plotting the GX curves at a specific temperature. If your equations
-# and code are properly defined, the code below should produce a plot showing
-# a red curve for FCC, a purple curve for BCT, and a blue curve for L.
-
-# Define plot resolution. Using the same resolution used for numerical 
-# calculations is unnecessarily high and, therefore, slow for this purpose.
-plotres = 1e-4
-
-# Define the compositional range for plotting.
-Xrange = np.arange(plotres, 1 - plotres, plotres)
-
-# Define the temperature in K for plotting our first GX curves. I've chosen a 
-# convenient temperature to compare you model against the project instructions.
-plottemp = 170 + 273.15
-
-# Plot the GX curves at "plottemp" as a sanity check for the equations you've
-# defined above for DeltaG_mix of the various phases.
-plt.figure('Random GX Plot',dpi=300)
-plt.title(model_name + f' - $T$ = {plottemp - 273.15:.1f} °C\n')
-plt.plot(Xrange, DeltaG_mix_FCC(Xrange, plottemp),color='r',label='FCC')
-plt.plot(Xrange, DeltaG_mix_BCT(Xrange, plottemp),color='purple',label='BCT')
-plt.plot(Xrange, DeltaG_mix_L(Xrange, plottemp),color='b',label='L')
-plt.ylabel(r'Δ$G_\mathrm{mix}$ (J/mol)')
-plt.xlabel(f'$X_\\mathrm{{{comp2}}}$ (mol/mol)')
-plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
-
-# Find the minimum value on all GX curves to determine optimal y-axis limits.
-ymin = min(min(DeltaG_mix_FCC(Xrange, plottemp)),min(DeltaG_mix_BCT(Xrange, plottemp)),min(DeltaG_mix_L(Xrange, plottemp)))
-
-# Set the x- and y-axis limits so our plot is reasonably zoomed in on the 
-# important regions.
-plt.ylim(ymin*1.1,0)
-plt.xlim(0,1)
-plt.legend()
-plt.show() # This line isn't necessary in Spyder, but it can't hurt.
-
-print(f'This cell took {time.time()-start:.2f} seconds to run.')
 
 #%%
 #  _____      _            _   _        ____        _                
@@ -240,6 +213,7 @@ ymin = min(min(DeltaG_mix_FCC(Xrange, plottemp)),min(DeltaG_mix_BCT(Xrange, plot
 plt.ylim(ymin*1.1,0)
 plt.xlim(0,1)
 plt.legend()
+plt.savefig(model_name + ', $T$ = ' + f"{(plottemp - 273.15):.1f} °C.png")
 plt.show() # This line isn't necessary in Spyder, but it can't hurt.
 
 print(f'This cell took {time.time()-start:.2f} seconds to run.')
@@ -261,7 +235,7 @@ def FCCsolvus(T):
     # If statement used to confine the solver only to temperatures at which we
     # know a common tangent must exist. This prevents errors that could stop 
     # the code prematurely.
-    if T<T_eutectic: #Temperature is below eutectic
+    if T<=T_eutectic: #Temperature is below eutectic
             
         def func(x):
             X_2_FCC, X_2_BCT = x
@@ -292,7 +266,7 @@ def BCTsolvus(T): # <--- Solving twice is so inefficient but alas I am lazy
     # If statement used to confine the solver only to temperatures at which we
     # know a common tangent must exist. This prevents errors that could stop 
     # the code prematurely.  
-    if T<T_eutectic:
+    if T<=T_eutectic:
     
         def func(x):
             X_2_FCC, X_2_BCT = x
@@ -710,7 +684,7 @@ print('Plotting GX curves and tangents at several different temperatures...')
 
 # Define plot temperatures in °C. You can add/remove as many temperatures as 
 # you want from the list.
-temps_in_C = [25,100,180,200,300]
+temps_in_C = [50,175,225,300]
 
 # Define plot temperature in K.
 temps = [T + 273.15 for T in temps_in_C]
@@ -783,7 +757,7 @@ def plotgxcurves(plottemp):
         plt.text(xright + 2e-2,(yright+ymin)/2,round(xright,4), backgroundcolor = 'white',horizontalalignment="left",verticalalignment="bottom")
     except:
         pass
-
+    plt.savefig(model_name + ', $T$ = ' + f"{(plottemp - 273.15):.1f} °C.png")
     plt.show()
 
     return plt

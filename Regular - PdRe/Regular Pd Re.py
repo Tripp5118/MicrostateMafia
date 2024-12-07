@@ -105,45 +105,15 @@ if True:
 
     S_ideal = lambda X_2: R*(X_2*ln(X_2)+(1-X_2)*ln(1-X_2))
 
-
-# Values hard coded after being found by interaction_parameter_solver.py
-
-W_FCC = 28489.25325276
-W_HCP = 45879.43301668
-W_L   = 31927.32242207
-
-
-'''
-    w * X1 * X2 
-'''
-
-DeltaG_mix_FCC = lambda X_2, T:  W_FCC * X_2 * (1 - X_2) + T*S_ideal(X_2) + (1-X_2)*FCC_hanging_Pd(T) + X_2*FCC_hanging_Re(T)
-DeltaG_mix_HCP = lambda X_2, T: W_HCP * X_2 * (1 - X_2) + T*S_ideal(X_2) + (1-X_2)*HCP_hanging_Pd(T) + X_2*HCP_hanging_Re(T)
-DeltaG_mix_L = lambda X_2, T: W_L * X_2 * (1 - X_2) + T*S_ideal(X_2) + (1-X_2)*Liq_hanging_Pd(T) + X_2*Liq_hanging_Re(T)
+w_FCC, w_HCP, w_L = [28489.25325276,45879.43301668,31927.32242207]
+DeltaG_mix_FCC = lambda X_2, T: w_FCC*X_2*(1-X_2) + T*S_ideal(X_2) + (1-X_2)*FCC_hanging_Pd(T) + X_2*FCC_hanging_Re(T)
+DeltaG_mix_HCP = lambda X_2, T: w_HCP*X_2*(1-X_2) + T*S_ideal(X_2) + (1-X_2)*HCP_hanging_Pd(T) + X_2*HCP_hanging_Re(T)
+DeltaG_mix_L = lambda X_2, T: w_L*X_2*(1-X_2) + T*S_ideal(X_2) + (1-X_2)*Liq_hanging_Pd(T) + X_2*Liq_hanging_Re(T)
 
 plotres = 1e-4
 
+# Define the compositional range for plotting.
 Xrange = np.arange(plotres, 1 - plotres, plotres)
-
-plottemp = 1000 + 273.15
-
-plt.figure('Random GX Plot',dpi=300)
-plt.title(model_name + f' - $T$ = {plottemp - 273.15:.1f} °C\n')
-plt.plot(Xrange, DeltaG_mix_FCC(Xrange, plottemp),color='r',label='FCC')
-plt.plot(Xrange, DeltaG_mix_HCP(Xrange, plottemp),color='purple',label='HCP')
-plt.plot(Xrange, DeltaG_mix_L(Xrange, plottemp),color='b',label='L')
-plt.ylabel(r'Δ$G_\mathrm{mix}$ (J/mol)')
-plt.xlabel(f'$X_\\mathrm{{{comp2}}}$ (mol/mol)')
-plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
-
-ymin = min(min(DeltaG_mix_FCC(Xrange, plottemp)),min(DeltaG_mix_HCP(Xrange, plottemp)),min(DeltaG_mix_L(Xrange, plottemp)))
-
-plt.ylim(ymin*1.1,0)
-plt.xlim(0,1)
-plt.legend()
-plt.show()
-
-print(f'This cell took {time.time()-start:.2f} seconds to run.')
 
 #%%
 #  _____      _            _   _        ____        _                
@@ -158,6 +128,9 @@ print(f'This cell took {time.time()-start:.2f} seconds to run.')
 
 start = time.time()
 
+### peritecTrue taken from true points where solvus liquidus and/or solidus lines meet
+peritecTrue = [16.036184210526315, 9.292763157894736, 93.91447368421053]
+
 print('Solving for and plotting the eutectic GX curves...')
 
 def ddx(function,dX):
@@ -168,15 +141,14 @@ dG_HCP = ddx(DeltaG_mix_HCP,10**-5)
 
 def func(x):
     X_2_FCC, X_2_L, X_2_HCP, T = x
-    
+
     eqns = [ dG_HCP(X_2_HCP,T) - dG_FCC(X_2_FCC,T), dG_HCP(X_2_HCP,T) - dG_Liq(X_2_L,T),
-             DeltaG_mix_HCP(X_2_HCP,T) - X_2_HCP * dG_HCP(X_2_HCP,T) - (DeltaG_mix_L(X_2_L,T) - X_2_L*dG_Liq(X_2_L,T)),
-             DeltaG_mix_HCP(X_2_HCP,T) - X_2_HCP * dG_HCP(X_2_HCP,T) - (DeltaG_mix_FCC(X_2_FCC,T) - X_2_FCC*dG_FCC(X_2_FCC,T))]
-    
-    return eqns
+                 DeltaG_mix_HCP(X_2_HCP,T) - X_2_HCP * dG_HCP(X_2_HCP,T) - (DeltaG_mix_L(X_2_L,T) - X_2_L*dG_Liq(X_2_L,T)),
+                 DeltaG_mix_HCP(X_2_HCP,T) - X_2_HCP * dG_HCP(X_2_HCP,T) - (DeltaG_mix_FCC(X_2_FCC,T) - X_2_FCC*dG_FCC(X_2_FCC,T))]
+    return  eqns
 
 X_2_FCC_guess = .10
-X_2_L_guess = .5 
+X_2_L_guess = .5
 X_2_HCP_guess = .90
 T_guess = 1650
 
@@ -192,6 +164,7 @@ print(res)
 eutec_soln = res.x
 print(eutec_soln)
 
+
 X_2_FCC_eutectic = eutec_soln[0]
 X_2_L_eutectic = eutec_soln[1]
 X_2_HCP_eutectic = eutec_soln[2]
@@ -200,12 +173,12 @@ T_eutectic = eutec_soln[3]
 plottemp = T_eutectic
 
 
-plt.figure('Eutectic GX Plot',dpi=300)
+plt.figure('Peritectic GX Plot',dpi=300)
 plt.title(model_name + f' - $T$ = {plottemp - 273.15:.1f} °C\n')
 plt.plot(Xrange, DeltaG_mix_FCC(Xrange, plottemp),color='r',label='FCC')
 plt.plot(Xrange, DeltaG_mix_HCP(Xrange, plottemp),color='purple',label='HCP')
 plt.plot(Xrange, DeltaG_mix_L(Xrange, plottemp),color='b',label='L')
-plt.plot([X_2_FCC_eutectic,X_2_HCP_eutectic],[DeltaG_mix_FCC(X_2_FCC_eutectic, T_eutectic),DeltaG_mix_HCP(X_2_HCP_eutectic, T_eutectic)],color='black',linestyle='--')
+plt.plot([X_2_L_eutectic,X_2_HCP_eutectic],[DeltaG_mix_L(X_2_L_eutectic, T_eutectic),DeltaG_mix_HCP(X_2_HCP_eutectic, T_eutectic)],color='black',linestyle='--')
 plt.ylabel(r'Δ$G_\mathrm{mix}$ (J/mol)')
 plt.xlabel(f'$X_\\mathrm{{{comp2}}}$ (mol/mol)')
 plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
@@ -217,6 +190,7 @@ ymin = min(min(DeltaG_mix_FCC(Xrange, plottemp)),min(DeltaG_mix_HCP(Xrange, plot
 plt.ylim(ymin*1.1,0)
 plt.xlim(0,1)
 plt.legend()
+plt.savefig(model_name + ', $T$ = ' + f"{(plottemp - 273.15):.1f} °C.png")
 plt.show()
 
 print(f'This cell took {time.time()-start:.2f} seconds to run.')
@@ -425,7 +399,7 @@ plt.plot(list(map(FCCliquidus,temprange)),temprange - 273.15,color='b',label='L'
 plt.plot(list(map(HCPliquidus,temprange)),temprange - 273.15,color='b')
 
 
-plt.plot([HCPsolvus(T_eutectic),HCPliquidus(T_eutectic)],[T_eutectic - 273.15,T_eutectic - 273.15],color='black')
+plt.plot([FCCliquidus(T_eutectic),HCPsolidus(T_eutectic)],[T_eutectic - 273.15,T_eutectic - 273.15],color='black')
 
 plt.ylabel(r'$T$ (°C)')
 plt.xlabel(f'$X_\\mathrm{{{comp2}}}$ (mol/mol)')
@@ -583,7 +557,7 @@ print('Plotting GX curves and tangents at several different temperatures...')
 
 # Define plot temperatures in °C. You can add/remove as many temperatures as 
 # you want from the list.
-temps_in_C = [1000]
+temps_in_C = [1000,1550,2000,3000]
 
 # Define plot temperature in K.
 temps = [T + 273.15 for T in temps_in_C]
@@ -656,7 +630,7 @@ def plotgxcurves(plottemp):
         plt.text(xright + 2e-2,(yright+ymin)/2,round(xright,4), backgroundcolor = 'white',horizontalalignment="left",verticalalignment="bottom")
     except:
         pass
-
+    plt.savefig(model_name + ', $T$ = '+f"{(plottemp - 273.15):.1f} °C.png")
     plt.show()
 
     return plt
