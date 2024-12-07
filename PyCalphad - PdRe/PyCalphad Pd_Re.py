@@ -37,7 +37,7 @@ db_alzn = Database('Pd-Re_Complete2.tdb')  #Pd-Re_Complete  PD-RE_SKELETON
 my_phases_pdre = ['LIQUID', 'FCC_A1', 'HCP_A3']
 
 # Create a matplotlib Figure object and get the active Axes
-fig = plt.figure(figsize=(9,6),dpi=800)
+fig = plt.figure(figsize=(9,6))  # Match figure size with the first script
 axes = fig.gca()
 
 # Compute the phase diagram and plot it on the existing axes using the `plot_kwargs={'ax': axes}` keyword argument
@@ -56,12 +56,13 @@ ASM_ticks = np.linspace(1000,3200,8)
 ASM_ticks_K = [T + 273.15 for T in ASM_ticks]
 
 # Set custom tick values and labels on the plot.
-ax.set_ylim(min(ASM_ticks_K),max(ASM_ticks_K))
+ax.set_ylim(min(ASM_ticks_K), max(ASM_ticks_K))
 ax.set_yticks(ASM_ticks_K)
-ax.set_yticklabels([str(T) for T in ASM_ticks])
-ax.set_yticklabels([f"{T:.0f}" for T in ASM_ticks])
-ax.set_ylabel('Temperature (°C)')
+ax.set_yticklabels([f"{T:.0f}" for T in ASM_ticks])  # Consistent formatting with the first script
+ax.set_ylabel('Temperature (°C)')  # Match the label format
 
+# This last line is not needed if you are using Spyder, but may be necessary
+# in other Python coding environments.
 plt.show()
 
 # This let's us know how long it took to run the code.
